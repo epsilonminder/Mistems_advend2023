@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.3.433">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="dcterms.date" content="2023-12-01">
+
+<title>バイオインフォマティクスは結構エンジニア的だという話</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+</style>
+
+
+<script src="Mistems_advent2_files/libs/clipboard/clipboard.min.js"></script>
+<script src="Mistems_advent2_files/libs/quarto-html/quarto.js"></script>
+<script src="Mistems_advent2_files/libs/quarto-html/popper.min.js"></script>
+<script src="Mistems_advent2_files/libs/quarto-html/tippy.umd.min.js"></script>
+<script src="Mistems_advent2_files/libs/quarto-html/anchor.min.js"></script>
+<link href="Mistems_advent2_files/libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="Mistems_advent2_files/libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="Mistems_advent2_files/libs/bootstrap/bootstrap.min.js"></script>
+<link href="Mistems_advent2_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="Mistems_advent2_files/libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+
+
+</head>
+
+<body>
+
+<div id="quarto-content" class="page-columns page-rows-contents page-layout-article">
+<div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+  <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+  <li><a href="#だれこいつ" id="toc-だれこいつ" class="nav-link active" data-scroll-target="#だれこいつ">だれこいつ</a></li>
+  <li><a href="#イントロ" id="toc-イントロ" class="nav-link" data-scroll-target="#イントロ">イントロ</a></li>
+  <li><a href="#バイオインフォマティクスってなんだ" id="toc-バイオインフォマティクスってなんだ" class="nav-link" data-scroll-target="#バイオインフォマティクスってなんだ">バイオインフォマティクスってなんだ？</a>
+  <ul class="collapse">
+  <li><a href="#解析の流れ" id="toc-解析の流れ" class="nav-link" data-scroll-target="#解析の流れ">解析の流れ</a>
+  <ul class="collapse">
+  <li><a href="#rna抽出２.シーケンス準備" id="toc-rna抽出２.シーケンス準備" class="nav-link" data-scroll-target="#rna抽出２.シーケンス準備">1.RNA抽出〜２.シーケンス準備</a></li>
+  <li><a href="#シーケンス" id="toc-シーケンス" class="nav-link" data-scroll-target="#シーケンス">3.シーケンス</a></li>
+  <li><a href="#クオリティチェック" id="toc-クオリティチェック" class="nav-link" data-scroll-target="#クオリティチェック">4.クオリティチェック</a></li>
+  <li><a href="#マッピング" id="toc-マッピング" class="nav-link" data-scroll-target="#マッピング">5.マッピング</a></li>
+  <li><a href="#カウント" id="toc-カウント" class="nav-link" data-scroll-target="#カウント">6. カウント</a></li>
+  <li><a href="#アノテーション" id="toc-アノテーション" class="nav-link" data-scroll-target="#アノテーション">7.アノテーション</a></li>
+  <li><a href="#統計処理-9.可視化" id="toc-統計処理-9.可視化" class="nav-link" data-scroll-target="#統計処理-9.可視化">8.　統計処理　〜　9.可視化</a></li>
+  <li><a href="#生物学的な意味づけ" id="toc-生物学的な意味づけ" class="nav-link" data-scroll-target="#生物学的な意味づけ">10. 生物学的な意味づけ</a></li>
+  </ul></li>
+  </ul></li>
+  <li><a href="#バイオインフォマティクスに情報科学のわかるエンジニアさんがほしい理由" id="toc-バイオインフォマティクスに情報科学のわかるエンジニアさんがほしい理由" class="nav-link" data-scroll-target="#バイオインフォマティクスに情報科学のわかるエンジニアさんがほしい理由">バイオインフォマティクスに情報科学のわかるエンジニアさんがほしい理由</a>
+  <ul class="collapse">
+  <li><a href="#データがでかい" id="toc-データがでかい" class="nav-link" data-scroll-target="#データがでかい">データがでかい</a></li>
+  <li><a href="#cli操作" id="toc-cli操作" class="nav-link" data-scroll-target="#cli操作">CLI操作</a></li>
+  <li><a href="#linuxunix環境" id="toc-linuxunix環境" class="nav-link" data-scroll-target="#linuxunix環境">Linux/Unix環境</a></li>
+  <li><a href="#自動化" id="toc-自動化" class="nav-link" data-scroll-target="#自動化">自動化</a></li>
+  <li><a href="#サーバーサイド技術" id="toc-サーバーサイド技術" class="nav-link" data-scroll-target="#サーバーサイド技術">サーバーサイド技術</a></li>
+  <li><a href="#データベース検索" id="toc-データベース検索" class="nav-link" data-scroll-target="#データベース検索">データベース検索</a></li>
+  <li><a href="#機械学習統計処理" id="toc-機械学習統計処理" class="nav-link" data-scroll-target="#機械学習統計処理">機械学習、統計処理</a></li>
+  <li><a href="#リモートワークできる" id="toc-リモートワークできる" class="nav-link" data-scroll-target="#リモートワークできる">リモートワークできる</a></li>
+  </ul></li>
+  <li><a href="#さいごに" id="toc-さいごに" class="nav-link" data-scroll-target="#さいごに">さいごに</a></li>
+  <li><a href="#参考" id="toc-参考" class="nav-link" data-scroll-target="#参考">参考</a></li>
+  </ul>
+</nav>
+</div>
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">バイオインフォマティクスは結構エンジニア的だという話</h1>
+<p class="subtitle lead">みすてむず いず みすきーしすてむず Advent Calendar 2023</p>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+    <div>
+    <div class="quarto-title-meta-heading">Published</div>
+    <div class="quarto-title-meta-contents">
+      <p class="date">December 1, 2023</p>
+    </div>
+  </div>
+  
+    
+  </div>
+  
+
+</header>
+
+<section id="だれこいつ" class="level1">
+<h1>だれこいつ</h1>
+<div class="tabset-margin-container"></div><div class="panel-tabset">
+<ul class="nav nav-tabs" role="tablist"><li class="nav-item" role="presentation"><a class="nav-link active" id="tabset-1-1-tab" data-bs-toggle="tab" data-bs-target="#tabset-1-1" role="tab" aria-controls="tabset-1-1" aria-selected="true" href="">簡単に</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-1-2-tab" data-bs-toggle="tab" data-bs-target="#tabset-1-2" role="tab" aria-controls="tabset-1-2" aria-selected="false" href="">もう少し説明</a></li></ul>
+<div class="tab-content">
+<div id="tabset-1-1" class="tab-pane active" role="tabpanel" aria-labelledby="tabset-1-1-tab">
+<ul>
+<li>epsilon</li>
+<li>X (旧Twitter)では「沼Utsubo」とかいう名前でやってました</li>
+<li>元々は細胞とかいじってた人。広く言えばバイオ系のひと。</li>
+<li>今はバイオインフォマティクスを学んだり使ったりしてる(ことになっている)人</li>
+<li>その実態は、コピペ職人、エクセル・パワポ職人である</li>
+</ul>
+</div>
+<div id="tabset-1-2" class="tab-pane" role="tabpanel" aria-labelledby="tabset-1-2-tab">
+<p>元々は、細胞を培養したりすり潰したり溶かしたりして生きてきた人だったのだが、 研究を進めていく過程で次世代シーケンサー（NGS)という機械を使わなきゃいけなくなり、 パソコンがそこそこ得意だったので「お前、これやれよ」と命令され、NGSの使い方を勉強していくうちに 実験データの解析も勉強しなきゃいけなくなり、データ解析の勉強してたら「それ、バイオインフォマティクス っていう分野だよ」と教えてもらい、そこからバイオインフォマティクスを学ぶようになった人。 永遠の初心者。ずっと初心者。</p>
+</div>
+</div>
+</div>
+</section>
+<section id="イントロ" class="level1">
+<h1>イントロ</h1>
+<p>いつメンの皆様、こんにちは。 はじめましての方、はじめまして。 epsilonと申します。</p>
+<p>今日は、自分がそこそこ興味を持って、ほんの少しだけ専門として取り組んでいる(?) バイオインフォマティクスという世界のお話を少しして、 実はこの界隈って、エンジニアや情報科学の人が求められてると思うよ、 特技を活かせるよって話を、私個人の見解と感想(=お気持ちベース）で話したいと思います。</p>
+<p>みすてむずでお話する内容ではないかなとも思いますが、違う世界の話を聞くのも面白いものなので、 なんかの片手間にどうぞ。</p>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Note
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>お前みたいなレベルの低いやつが偉そうに何語ってんだよと言われそうな気がかなりしてますが、 そういう声はあえて無視していく方向で……</p>
+</div>
+</div>
+<div class="callout callout-style-default callout-warning callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Warning
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>大きな間違いはないように気をつけて書いているつもりですが、理解不足、勉強不足、誤解などにより 正しくない内容が記載されている可能性があります。ご利用に際してはご注意ください。</p>
+</div>
+</div>
+</section>
+<section id="バイオインフォマティクスってなんだ" class="level1">
+<h1>バイオインフォマティクスってなんだ？</h1>
+<p>詳しい説明は<a href="https://crystal-method.com/topics/bioinformatics/">ちゃんとした企業ブログ様</a>などにお任せするとして。</p>
+<p>ものすごく雑に言うと、バイオインフォマティクスとは「生命に関わる様々な情報を情報科学や統計学の手法を用いて解析して理解する」ことを目指す学問です。</p>
+<p>生物に関わる情報は多種多様なものがあって、例えば、俗に「生命の設計図」なんて呼ばれるDNA配列（ゲノム） の情報もそうですし、そのゲノムからいつ、どんなタンパク質が作られるのか、という情報もそうですし、 生物の体の中でそれぞれの細胞がどんな物質をやり取りしているか、などと言うことも生命に関わる情報です。 あるいは、生命がどうやって進化してきたか、生物Aと生物Bに共通の祖先はあるのか、なんて分析もやはり、 生命に関わる情報といえるかもしれません。 もっと単純に、それぞれの個体の大きさや重さ、羽の数、葉の数、なんてのも生命に関する情報でしょう。</p>
+<p>今ほど述べたように、生命の活動にはたくさんの「情報」が関わってきます。 そんな生物の情報をいろんな手法で解析して理解しようというのがバイオインフォマティクスで<a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a>、 それを行う人をバイオインフォマティシャンと読んだりします。</p>
+<p>ここでは一般に「ゲノム研究」とか「遺伝子解析」とか言われることの多い、ゲノムやそれに関わる分子生物学のところの話をしてみたいと思います。</p>
+<section id="解析の流れ" class="level2">
+<h2 class="anchored" data-anchor-id="解析の流れ">解析の流れ</h2>
+<p>では、RNAの発現解析を例に、バイオインフォマティクス解析の流れを見てみましょう。 RNAの発現解析は、どんな遺伝子が機能しているのか、どのくらいのタンパク質が作られているのか（遺伝子が発現しているのか）を解析するために行います。<a href="#fn2" class="footnote-ref" id="fnref2" role="doc-noteref"><sup>2</sup></a></p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="./protocol.png" class="img-fluid figure-img" style="width:60.0%"></p>
+<figcaption class="figure-caption">Fig2. RNA解析の流れ</figcaption>
+</figure>
+</div>
+<p>ここに挙げたのは、RNAの発現解析の流れを簡単に示したもので、青色の部分が実際に実験室でやるところ、 黄色のところがデータ処理の部分（バイオインフォマティシャンはここだけ担当することも多いです）、 緑の部分が実際に研究者がうんうん言いながら結果を解釈する部分です。<del>とてもつらい</del></p>
+<section id="rna抽出２.シーケンス準備" class="level3">
+<h3 class="anchored" data-anchor-id="rna抽出２.シーケンス準備">1.RNA抽出〜２.シーケンス準備</h3>
+<p>サンプルからRNAを抽出し、次世代シーケンサーで解析できる形に処理します。様々な試薬や（あの感染症で有名になった）PCR法などを用いて、 サンプルから取り出したRNAをシーケンサーで読める形に整形してやります。 コンピューターを用いたデータ処理を「ドライな解析（Dry lab)」というのに対して、実験室で実際にRNAを抽出するような操作を「ウェットな解析（Wet lab)」と呼ぶことがあります。</p>
+</section>
+<section id="シーケンス" class="level3">
+<h3 class="anchored" data-anchor-id="シーケンス">3.シーケンス</h3>
+<p>次世代シーケンサー（NGS)を用いて実際に塩基配列を読み取っていきます。 NGSでは、塩基配列を適当な長さ（50〜200文字）ぐらいの断片に切って、 それを高度に並列化して一気に読んでいきます。</p>
+<p>どんな実験をするかにもよりますが、1回のシーケンスで数百Gbyte~1Tbyte近い量の、大量のテキストデータが出力されてきます<a href="#fn3" class="footnote-ref" id="fnref3" role="doc-noteref"><sup>3</sup></a>。</p>
+</section>
+<section id="クオリティチェック" class="level3">
+<h3 class="anchored" data-anchor-id="クオリティチェック">4.クオリティチェック</h3>
+<p>次世代シーケンサーでの測定により、大量の塩基配列データが出力されます。 その中には、ノイズが混ざっていたり、前処理に由来する不純物の塩基配列が混ざっていることがあるので、今後の解析の前に取り除きます。 Gabage in, Gabage outはこの世の真実ですので、このプロセスが最も重要だと考える研究者も多いです。</p>
+</section>
+<section id="マッピング" class="level3">
+<h3 class="anchored" data-anchor-id="マッピング">5.マッピング</h3>
+<p>一般的な次世代シーケンサーで読み取られた塩基配列のデータは50〜200塩基程度の 長さに断片化しています。 この断片化された配列データを、標準的な塩基配列データ（リファレンスゲノム配列）上に 適切に配置していきます。</p>
+<p>ヒトの全塩基配列の長さはおおよそ30億文字で、そのうち遺伝子の領域(タンパク質のコードが書かれている領域)が 2万ヶ所ぐらいあると言われています。 1サンプルに含まれる断片化された配列データはおおよそ5000万〜6000万<a href="#fn4" class="footnote-ref" id="fnref4" role="doc-noteref"><sup>4</sup></a>ありますので、断片を並べるには膨大な計算量が必要となります。 そのため、マッピング処理のために高性能のワークステーションや スーパーコンピューターを用いたりします。</p>
+</section>
+<section id="カウント" class="level3">
+<h3 class="anchored" data-anchor-id="カウント">6. カウント</h3>
+<p>断片が正しく配置されたら、それぞれの領域にいくつの配列断片が含まれるのかをカウントします。 数えるのは普通のノートパソコンでもできますが、やはり非力なパソコンだと時間がかかります。</p>
+</section>
+<section id="アノテーション" class="level3">
+<h3 class="anchored" data-anchor-id="アノテーション">7.アノテーション</h3>
+<p>リファレンスゲノム上に配置された配列に対して、 遺伝子の名前やその遺伝子の機能などの情報を付け足して、後の解析で 使いやすくします。</p>
+<p>これも大量の情報が公共のデータベースで公開されているので、 各遺伝子に関する情報を引っ張ってきて、自分の手持ちのデータとマージします。</p>
+</section>
+<section id="統計処理-9.可視化" class="level3">
+<h3 class="anchored" data-anchor-id="統計処理-9.可視化">8.　統計処理　〜　9.可視化</h3>
+<p>ここから先が本当に泥臭い作業になってきます。</p>
+<p>7.までの処理を行うと、ようやく、どんな遺伝子がどれだけ機能していて、 どれだけのタンパク質が作られようとしているのか、 という情報を知ることができます。</p>
+<p>ただし、ここまで得られるファイルはただの巨大な表でしかないので、 この中から、どのような遺伝子が特徴的に機能しているのかというのを 把握しなければなりません。<br>
+数万×数百行の表を俯瞰的に見られる人類はまれなので、 見やすい形にするために、特徴的な部分だけを抜き出したり、 グラフを書いたりします。</p>
+<p>散布図やヒートマップのような単純な図から、遺伝子発現パターンから 主成分分析をかけたり、クラスタリングしたり、場合によっては 機械学習を用いて特徴的な遺伝子を見つけたりします。</p>
+<p>この辺は計算機的な処理と生物学的な知識の融合した部分かもしれません。</p>
+</section>
+<section id="生物学的な意味づけ" class="level3">
+<h3 class="anchored" data-anchor-id="生物学的な意味づけ">10. 生物学的な意味づけ</h3>
+<p><del>ここからが本当の地獄だ</del></p>
+<p>いくら見た目がきれいだから、統計学的にゆーいだからといって、 生物学的に意味のない反応にばかり注目していても仕方ないわけで、 自分が発見したものが過去に報告されている事例とどのように関係するか、 そもそも過去に報告されているものではないのか、というのを調べなければいけません。</p>
+<p>大量の論文を読み込む地道な作業が必要な場合が多いのもこの部分ですが、 一方で、論文データベースを機械学習やAIですべて読みこんで、 新しいデータベースを作って検証するような研究も進んでいるようです。 (このあたりは皆さんのほうがご専門な気もします)</p>
+</section>
+</section>
+</section>
+<section id="バイオインフォマティクスに情報科学のわかるエンジニアさんがほしい理由" class="level1">
+<h1>バイオインフォマティクスに情報科学のわかるエンジニアさんがほしい理由</h1>
+<p>以上、ざっとRNAの解析を例にして、バイオインフォマティクス解析の 一例をご紹介しました。バイオ系、生物学といっても、データ解析の部分は意外と、コンピューターで処理する部分が多いんだなと思っていただけたのではないでしょうか。 最後に、私が考えるバイオインフォマティクスで、エンジニアさんのスキルが役立つと思われる理由をお話いたします。</p>
+<section id="データがでかい" class="level2">
+<h2 class="anchored" data-anchor-id="データがでかい">データがでかい</h2>
+<p>1回の検査で出てくるシーケンス情報が巨大です。シーケンスのやり方にもよりますが、圧縮したテキストデータ（gzip)で1サンプルあたり数GByteレベルということも当たり前です。 そして多くの場合、1回の実験では10サンプル以上取り扱うことも多いので、 1回の測定で数百GB〜１TBレベルのデータが吐き出されてきます。 そのため、巨大なファイルを適切に（多くの場合はコマンドラインで）取り扱うスキルが求められます。</p>
+</section>
+<section id="cli操作" class="level2">
+<h2 class="anchored" data-anchor-id="cli操作">CLI操作</h2>
+<p>たしかにWebアプリがあったり、商用ソフトはGUIで操作できることも多いのですが、 バイオインフォマティクスで使うツールは割とLinux用に作られていることが多いので CLI操作がまだまだ必須です。また、前述の通り、取り扱うファイルがクソでかい上に多量になりがちなので、 CLI操作できると幸せになります。 そして、パソコンが苦手な人、苦手ではなくてもCLIに慣れてない人は、あの真っ黒なコンソールをみた瞬間に パニックに陥ります。（そういう人、結構多いです）</p>
+</section>
+<section id="linuxunix環境" class="level2">
+<h2 class="anchored" data-anchor-id="linuxunix環境">Linux/Unix環境</h2>
+<p>上に書いたCLIとも共通するのですが。 解析に使うシステムがLinux/Unix環境である場合が多いので、最低限の操作が求められます。 まぁ、別に難しい処理を求められるわけではなく、基本的なファイル操作ができれば十分です。 ログファイルから必要なところを抜き出せるような人なら余裕でしょう。</p>
+</section>
+<section id="自動化" class="level2">
+<h2 class="anchored" data-anchor-id="自動化">自動化</h2>
+<p>実は、次世代シーケンサーで配列情報を読み取る（シーケンス）してから、生物学的な検討をするまでの段階は 割と定形処理だけで解決可能です。逆に、ここを定形処理することで、解析の客観性を担保するという意味合いもあります。 そのため、解析を定型化するためにCWL（Common workflow language)というのを用いて、一連の処理を定型化 する取り組みなどが行われています。また、これらをWeb上で行うGalaxyと呼ばれるシステムが使われることもあります。</p>
+</section>
+<section id="サーバーサイド技術" class="level2">
+<h2 class="anchored" data-anchor-id="サーバーサイド技術">サーバーサイド技術</h2>
+<p>取り扱う配列情報が巨大なので、ローカルマシン（特にノートパソコン）で処理するのはちょっと きついことがあり、計算サーバーに処理をぶん投げることがあります。 例えば国立遺伝学研究所では、バイオインフォマティクス専用のスーパーコンピューターが運用されており、 登録すれば誰でも無料で使うことが可能です。 スパコン以外にも、AWS(Amazon web service)やGCP(Google computing platform)上で バイオインフォマティクス用の計算資源が提供されていたり、大きな施設ではオンプレミスで 計算サーバーを持っている場合もあります。バイオインフォマティシャンが環境構築まで面倒をみることも多いので、 やはりサーバーサイドの知識があると強みになります。 また、近年では解析環境をDockerで公開していたり、実験ごとに環境を分けて管理する場合もあるので、 仮想化やコンテナの知識も重宝されると思います。</p>
+</section>
+<section id="データベース検索" class="level2">
+<h2 class="anchored" data-anchor-id="データベース検索">データベース検索</h2>
+<p>遺伝子の機能についての情報や、その遺伝子がどのような臓器でどんなときに働いているのかということが 世界中の研究者によって調べられており、それがデータベースとして公開されています。[^NCBI] ただ、そのデータベースから必要な情報だけを取ってくるのは結構大変です。</p>
+<p>データベースといってもSQLが叩ける必要はないのですが、 公開されているAPIを叩けたり、CSV形式で公開されている表を操作できたり、複数のデータベースにまたがっている情報を必要な形に整形したりするスキルが求められます。</p>
+<p>また、過去の論文などのデータベース化されていない知識も解析の対象となってきており、自然言語処理の技術が必要とされたりもします。</p>
+</section>
+<section id="機械学習統計処理" class="level2">
+<h2 class="anchored" data-anchor-id="機械学習統計処理">機械学習、統計処理</h2>
+<p>なにしろ出てくるデータ量が多いので、Excelで簡単データ集計♪という わけには行きません。</p>
+<p>主成分分析をかける場合にも、何万遺伝子×数十サンプルの巨大行列を相手にする場合がよくあり、RやPythonでスクリプトを書いて処理することが一般的です。データの要約や特徴量の抽出など、データサイエンスの知識や技術が必要になってきます。</p>
+<p>用いる手法も、主成分分析や散布図、線形回帰などの基本的なところから、機械学習やグラフ理論、場合によってはLLMなどの自然言語処理の処方を使った解析なども行われています。 ML/AIの知識をフル活用してバリバリ研究を進めるような研究者もいらっしゃいます。つよい。</p>
+</section>
+<section id="リモートワークできる" class="level2">
+<h2 class="anchored" data-anchor-id="リモートワークできる">リモートワークできる</h2>
+<p>これ、生物学・バイオ系の者にとっては画期的です。</p>
+<p>なにしろ、データにしてしまえば、培地を交換したり餌やりをしたりする必要がなく、サーバーにアクセスさえできれば自宅からでもカフェからでも 好きなところから解析のお仕事ができます。もう、ラボに泊まり込む必要はありません。 <del>まー、バイオインフォやってても、締切直前の徹夜仕事はかわんないんですけど</del></p>
+<p>逆に、実際にラボで細胞の世話したり実験したり生物現象の分析したりする部分を生物・バイオ系のものが担当し、 バイオインフォマティクス処理を外注できるようになっています。 バイオインフォマティクス解析だけを専門的に受け付ける企業も多数出てきています。 <a href="#fn5" class="footnote-ref" id="fnref5" role="doc-noteref"><sup>5</sup></a></p>
+</section>
+</section>
+<section id="さいごに" class="level1">
+<h1>さいごに</h1>
+<p>以上、非常に駆け足になりましたが、バイオインフォマティクスの世界をちょっとだけご紹介しました。</p>
+<p>生物とコンピューターは全然別の世界のように思われるかもしれませんが、生物データの処理には情報科学の知識や技術が必要なんだ！ということが伝わっていると嬉しいです。</p>
+<p>バイオ系の科学者は情報科学の専門家ではありません。 難しい機械学習の論文だとか、アルゴリズムの実装だとか、サーバー運用なんかはよくわかりません。 なので、つよつよエンジニアの皆様にぜひともバイオインフォマティクスの世界を知っていただき、 プロの視点から、バイオ系のにんげんどもにご指導・アドバイスをいただけると嬉しいなぁと思っております。</p>
+</section>
+<section id="参考" class="level1">
+<h1>参考</h1>
+<ol type="i">
+<li><p><a href="https://crystal-method.com/topics/bioinformatics/">「あらゆる分野で活用されるバイオインフォマティクスとは?詳しく解説!」</a>,web, クリスタルメソッド株式会社,2023/11/26閲覧</p></li>
+<li><p>中村 保一, 坊農 秀雅, 粕川 雄也, 仲里 猛留<a href="https://www.natureasia.com/ja-jp/ndigest/v12/n1/%E8%AA%B0%E3%82%82%E3%81%8C%26ldquo%3B%E3%83%90%E3%82%A4%E3%82%AA%E3%82%A4%E3%83%B3%E3%83%95%E3%82%A9%E3%83%9E%E3%83%86%E3%82%A3%E3%82%B7%E3%83%A3%E3%83%B3%26rdquo%3B%E3%81%AE%E6%99%82%E4%BB%A3/59368">「誰もが“バイオインフォマティシャン”の時代」</a>, Nature ダイジェスト Vol.12 No.1, DOI: 10.1038/ndigest.2015.150122, ネイチャージャパン、2015</p></li>
+<li><p>坊農 秀雅,<a href="https://youtu.be/nPctEKs_-X8?si=z3aT28aljliVTpy3">「研究がつなぐ未来 バイオインフォマティクスの役割 @ 「分子系統樹をつくろう」特別授業」</a>, https://youtu.be/nPctEKs_-X8?si=z3aT28aljliVTpy3, TogoTV, 2023</p></li>
+<li><p><a href="https://www.jst.go.jp/nbdc/bird/jinzai/literacy/streaming/">平成22年度ゲノムリテラシー講座</a>,バイオインフォマティクス推進センター</p></li>
+</ol>
+</section>
+
+
+<div id="quarto-appendix" class="default"><section id="footnotes" class="footnotes footnotes-end-of-document" role="doc-endnotes"><h2 class="anchored quarto-appendix-heading">Footnotes</h2>
+
+<ol>
+<li id="fn1"><p>バイオインフォマティクスと似た(?)概念の一つにシステム生物学というのがあります。バイオインフォマティクスが生命に関する情報の解析・分析を主体としているのに対して、システム生物学は生命活動を数理モデルで捉えるという点により重きを置いているように思います。（両者を一緒にやっている研究者も多数いらっしゃいます）<a href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn2"><p>なんでタンパク質のことを知りたいのにRNAを調べるのかというと、生体の中では、タンパク質はDNA→RNA→タンパク質という情報の流れで作られることがわかっていて、タンパク質が作られる前には必ず、そのタンパク質の鋳型になるRNAが作られることがわかっているためです。RNAはタンパク質に比べて分解されやすいという性質もあることから、RNAを調べると、いつどのようなタンパク質が作られようとしているのかを鋭敏に捉えることができます。また、タンパク質を直接分析するのが難しいことに対して、RNAは一度に大量のRNAを高速に測定することができるという理由もあります。<a href="#fnref2" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn3"><p>読み取った塩基（A,T,G,Cの4文字で表す）と読み取りクオリティを一緒に記録したFastqファイルという形式で出力されてきます。その実態は巨大なテキストファイルです。<a href="#fnref3" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn4"><p>次世代シーケンサーでは、正確性を上げるために、塩基配列の中の同じ部分を繰り返し計測します。そのために、1サンプルあたりに含まれる塩基配列の文字数は、100億とか1000億とかという文字数になります。<a href="#fnref4" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn5"><p>お給料いいらしいです。わたしは行ったことないけど。<a href="#fnref5" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+</ol>
+</section></div></main>
+<!-- /main column -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    text: function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  function tippyHover(el, contentFn) {
+    const config = {
+      allowHTML: true,
+      content: contentFn,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start'
+    };
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      return note.innerHTML;
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+</body></html>
